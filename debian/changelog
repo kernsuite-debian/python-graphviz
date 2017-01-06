@@ -1,0 +1,7 @@
+python-graphviz (0.5.2-1) unstable; urgency=low
+
+  * Initial packaging (Closes: #849050) 
+  * Note: Upstream name on pypi is graphviz, but that would conflict with the
+    C graphviz source package name
+
+ -- Diane Trout <diane@ghic.org>  Wed, 21 Dec 2016 13:55:52 -0800

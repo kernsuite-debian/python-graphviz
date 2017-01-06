@@ -1,0 +1,3 @@
+version=3
+opts=repack,compression=gzip,uversionmangle=s/graphviz/python-graphviz/ \
+http://pypi.debian.net/graphviz/graphviz-(.+)\.(?:zip|tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))

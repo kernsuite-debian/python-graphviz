@@ -6,3 +6,6 @@ dc33b7c91a62592c0560a0181aaddebadc3b043e
 python-graphviz_0.5.2.orig.tar.gz
 224e749ba77cef7efca86c1dc1866400b443f934
 56789
+debianTag="debian/%e%v"
+patchedTag="patched/%e%v"
+upstreamTag="upstream/%e%u"
