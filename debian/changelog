@@ -1,6 +1,10 @@
 python-graphviz (0.5.2-2) UNRELEASED; urgency=medium
 
+  [ Diane Trout ]
   * Add missing Vcs-* tags
+
+  [ Ondřej Nový ]
+  * d/control: Set Vcs-* to salsa.debian.org
 
  -- Diane Trout <diane@ghic.org>  Thu, 05 Jan 2017 17:14:26 -0800
 
