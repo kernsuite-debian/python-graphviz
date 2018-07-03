@@ -3,9 +3,20 @@
 API Reference
 =============
 
+.. autosummary::
+    :nosignatures:
+
+    ~graphviz.Graph
+    ~graphviz.Digraph
+    ~graphviz.Source
+    graphviz.render
+    graphviz.pipe
+    graphviz.view
+
 .. note::
-    The two main classes ``Graph`` and ``Digraph`` (for creating `undirected`
-    vs. `directed` graphs) have exactly the same API.
+
+    The two main classes :class:`.Graph` and :class:`.Digraph` (for creating
+    `undirected` vs. `directed` graphs) have exactly the same API.
     Their division reflects the fact that both graph types cannot be mixed.
 
 
@@ -17,7 +28,8 @@ Graph
         source,
         node, edge, edges, attr, subgraph,
         format, engine, encoding,
-        pipe, save, render, view
+        clear, copy, pipe, save, render, view,
+        directed
 
 
 Digraph
@@ -28,7 +40,8 @@ Digraph
         source,
         node, edge, edges, attr, subgraph,
         format, engine, encoding,
-        pipe, save, render, view
+        clear, copy, pipe, save, render, view,
+        directed
 
 
 Source
@@ -37,14 +50,16 @@ Source
 .. autoclass:: graphviz.Source
     :members:
         format, engine, encoding,
-        pipe, save, render, view
+        copy, pipe, save, render, view,
+        from_file, source
 
 
 Low-level functions
 -------------------
 
 The functions in this section are provided to work directly with existing
-files and strings instead of using the object-oriented DOT creation api above.
+files and strings instead of using the object-oriented DOT creation methods
+documented above.
 
 .. autofunction:: graphviz.render
 .. autofunction:: graphviz.pipe
@@ -59,3 +74,11 @@ Other
 
 .. autodata:: graphviz.FORMATS
    :annotation:
+
+.. autodata:: graphviz.ExecutableNotFound
+   :annotation:
+
+.. autofunction:: graphviz.version
+
+.. autofunction:: graphviz.nohtml
+

@@ -1,10 +1,13 @@
 Graphviz
 ========
 
-|PyPI version| |License| |Supported Python| |Format| |Downloads|
+|PyPI version| |License| |Supported Python| |Format| |Docs|
+
+|Travis| |Codecov|
 
 This package facilitates the creation and rendering of graph descriptions in
-the DOT_ language of the Graphviz_ graph drawing software (repo_) from Python.
+the DOT_ language of the Graphviz_ graph drawing software (`master repo`_) from
+Python.
 
 Create a graph object, assemble the graph by adding nodes and edges, and
 retrieve its DOT source code string. Save the source code to a file and render
@@ -12,25 +15,25 @@ it with the Graphviz installation of your system.
 
 Use the ``view`` option/method to directly inspect the resulting (PDF, PNG,
 SVG, etc.) file with its default application. Graphs can also be rendered
-and displayed within `Jupyter notebooks`_ (a.k.a. `IPython notebooks`_,
-example_).
+and displayed within `Jupyter notebooks`_ (formerly known as
+`IPython notebooks`_, example_) as well as the `Jupyter Qt Console`_.
 
 
 Links
 -----
 
-- GitHub: http://github.com/xflr6/graphviz
-- PyPI: http://pypi.python.org/pypi/graphviz
-- Documentation: http://graphviz.readthedocs.io
-- Changelog: http://graphviz.readthedocs.io/en/latest/changelog.html
-- Issue Tracker: http://github.com/xflr6/graphviz/issues
-- Download: http://pypi.python.org/pypi/graphviz#downloads
+- GitHub: https://github.com/xflr6/graphviz
+- PyPI: https://pypi.org/project/graphviz/
+- Documentation: https://graphviz.readthedocs.io
+- Changelog: https://graphviz.readthedocs.io/en/latest/changelog.html
+- Issue Tracker: https://github.com/xflr6/graphviz/issues
+- Download: https://pypi.org/project/graphviz/#files
 
 
 Installation
 ------------
 
-This package runs under Python 2.6, 2.7, and 3.3+, use pip_ to install:
+This package runs under Python 2.7, and 3.4+, use pip_ to install:
 
 .. code:: bash
 
@@ -78,16 +81,16 @@ Check the generated source code:
         A [label="King Arthur"]
         B [label="Sir Bedevere the Wise"]
         L [label="Sir Lancelot the Brave"]
-            A -> B
-            A -> L
-            B -> L [constraint=false]
+        A -> B
+        A -> L
+        B -> L [constraint=false]
     }
 
 Save and render the source code, optionally view the result:
 
 .. code:: python
 
-    >>> dot.render('test-output/round-table.gv', view=True)
+    >>> dot.render('test-output/round-table.gv', view=True)  # doctest: +SKIP
     'test-output/round-table.gv.pdf'
 
 .. image:: https://raw.github.com/xflr6/graphviz/master/docs/round-table.png
@@ -108,38 +111,45 @@ License
 This package is distributed under the `MIT license`_.
 
 
-.. _pip: http://pip.readthedocs.io
-.. _Graphviz:  http://www.graphviz.org
-.. _repo: http://github.com/ellson/graphviz/
-.. _download page: http://www.graphviz.org/Download.php
-.. _DOT: http://www.graphviz.org/doc/info/lang.html
-.. _Jupyter notebooks: http://jupyter.org
-.. _IPython notebooks: http://ipython.org/notebook.html
-.. _example: http://nbviewer.jupyter.org/github/xflr6/graphviz/blob/master/examples/notebook.ipynb
+.. _pip: https://pip.readthedocs.io
+.. _Graphviz:  https://www.graphviz.org
+.. _master repo: https://gitlab.com/graphviz/graphviz/
+.. _download page: https://www.graphviz.org/download/
+.. _DOT: https://www.graphviz.org/doc/info/lang.html
+.. _Jupyter notebooks: https://jupyter.org
+.. _IPython notebooks: https://ipython.org/notebook.html
+.. _example: https://nbviewer.jupyter.org/github/xflr6/graphviz/blob/master/examples/notebook.ipynb
+.. _Jupyter Qt Console: https://qtconsole.readthedocs.io
 
-.. _pygraphviz: http://pypi.python.org/pypi/pygraphviz
-.. _graphviz-python: http://pypi.python.org/pypi/graphviz-python
-.. _documentation: http://www.graphviz.org/pdf/gv.3python.pdf
-.. _pydot: http://pypi.python.org/pypi/pydot
+.. _pygraphviz: https://pypi.org/project/pygraphviz/
+.. _graphviz-python: https://pypi.org/project/graphviz-python/
+.. _documentation: https://www.graphviz.org/pdf/gv.3python.pdf
+.. _pydot: https://pypi.org/project/pydot/
 
-.. _MIT license: http://opensource.org/licenses/MIT
+.. _MIT license: https://opensource.org/licenses/MIT
 
 
 .. |--| unicode:: U+2013
 
 
 .. |PyPI version| image:: https://img.shields.io/pypi/v/graphviz.svg
-    :target: https://pypi.python.org/pypi/graphviz
+    :target: https://pypi.org/project/graphviz/
     :alt: Latest PyPI Version
 .. |License| image:: https://img.shields.io/pypi/l/graphviz.svg
-    :target: https://pypi.python.org/pypi/graphviz
+    :target: https://pypi.org/project/graphviz/
     :alt: License
 .. |Supported Python| image:: https://img.shields.io/pypi/pyversions/graphviz.svg
-    :target: https://pypi.python.org/pypi/graphviz
+    :target: https://pypi.org/project/graphviz/
     :alt: Supported Python Versions
 .. |Format| image:: https://img.shields.io/pypi/format/graphviz.svg
-    :target: https://pypi.python.org/pypi/graphviz
+    :target: https://pypi.org/project/graphviz/
     :alt: Format
-.. |Downloads| image:: https://img.shields.io/pypi/dm/graphviz.svg
-    :target: https://pypi.python.org/pypi/graphviz
-    :alt: Downloads
+.. |Docs| image:: https://readthedocs.org/projects/graphviz/badge/?version=stable
+    :target: https://graphviz.readthedocs.io/en/stable/
+    :alt: Readthedocs
+.. |Travis| image:: https://img.shields.io/travis/xflr6/graphviz.svg
+    :target: https://travis-ci.org/xflr6/graphviz
+    :alt: Travis
+.. |Codecov| image:: https://codecov.io/gh/xflr6/graphviz/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/xflr6/graphviz
+    :alt: Codecov

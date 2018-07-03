@@ -3,10 +3,11 @@
 import os
 import sys
 
-PY2 = sys.version_info[0] == 2
+PY2 = sys.version_info.major == 2
 
 
-if PY2:  # pragma: no cover
+if PY2:
+    string_classes = (str, unicode)  # needed individually for sublassing
     text_type = unicode
 
     def iteritems(d):
@@ -19,11 +20,20 @@ if PY2:  # pragma: no cover
             if not exist_ok or not os.path.isdir(name):
                 raise
 
+    def stderr_write_binary(data):
+        sys.stderr.write(data)
 
-else:  # pragma: no cover
+
+else:
+    string_classes = (str,)
     text_type = str
 
     def iteritems(d):
         return iter(d.items())
 
-    makedirs = os.makedirs
+    def makedirs(name, mode=0o777, exist_ok=False):  # allow os.makedirs mocking
+        return os.makedirs(name, mode, exist_ok=exist_ok)
+
+    def stderr_write_binary(data):
+        encoding = sys.stderr.encoding or sys.getdefaultencoding()
+        sys.stderr.write(data.decode(encoding))
