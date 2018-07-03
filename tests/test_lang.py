@@ -1,31 +1,38 @@
 # test_lang.py
 
-import unittest2 as unittest
+import pytest
 
-from graphviz.lang import quote, attributes
-
-
-class TestQuote(unittest.TestCase):
-
-    def test_quote_quotes(self):
-        self.assertEqual(quote('"spam"'), r'"\"spam\""')
-
-    def test_quote_keyword(self):
-        self.assertEqual(quote('node'), '"node"')
-        self.assertEqual(quote('EDGE'), '"EDGE"')
-        self.assertEqual(quote('Graph'), '"Graph"')
+from graphviz.lang import quote, attr_list, nohtml
 
 
-class TestAttributes(unittest.TestCase):
+def test_quote_quotes():
+    assert quote('"spam"') == r'"\"spam\""'
 
-    def test_attributes_pairs(self):
-        self.assertEqual(attributes(attributes=[('spam', 'eggs')]),
-            ' [spam=eggs]')
 
-    def test_attributes_map(self):
-        self.assertEqual(attributes(attributes={'spam': 'eggs'}),
-            ' [spam=eggs]')
+def test_quote_keyword():
+    assert quote('node') == '"node"'
+    assert quote('EDGE') == '"EDGE"'
+    assert quote('Graph') == '"Graph"'
 
-    def test_attributes_raw(self):
-        self.assertEqual(attributes(raw='spam'),
-            ' [spam]')
+
+def test_attr_list_pairs():
+    assert attr_list(attributes=[('spam', 'eggs')]) == ' [spam=eggs]'
+
+
+def test_attr_list_map():
+    assert attr_list(attributes={'spam': 'eggs'}) == ' [spam=eggs]'
+
+
+def test_nohtml(py2):
+    assert nohtml('spam') == 'spam'
+    assert isinstance(nohtml('spam'), str)
+    assert nohtml(u'spam') == u'spam'
+    assert isinstance(nohtml(u'spam'), unicode if py2 else str)
+
+
+def test_nohtml_invalid(py2):
+    match = r"required types.+'str'"
+    if py2:
+        match += r".+'unicode'"
+    with pytest.raises(TypeError, match=match):
+        nohtml(True)

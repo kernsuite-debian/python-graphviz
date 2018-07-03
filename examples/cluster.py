@@ -5,21 +5,21 @@ from graphviz import Digraph
 
 g = Digraph('G', filename='cluster.gv')
 
-c0 = Digraph('cluster_0')
-c0.body.append('style=filled')
-c0.body.append('color=lightgrey')
-c0.node_attr.update(style='filled', color='white')
-c0.edges([('a0', 'a1'), ('a1', 'a2'), ('a2', 'a3')])
-c0.body.append('label = "process #1"')
+# NOTE: the subgraph name needs to begin with 'cluster' (all lowercase)
+#       so that Graphviz recognizes it as a special cluster subgraph
 
-c1 = Digraph('cluster_1')
-c1.node_attr.update(style='filled')
-c1.edges([('b0', 'b1'), ('b1', 'b2'), ('b2', 'b3')])
-c1.body.append('label = "process #2"')
-c1.body.append('color=blue')
+with g.subgraph(name='cluster_0') as c:
+    c.attr(style='filled')
+    c.attr(color='lightgrey')
+    c.node_attr.update(style='filled', color='white')
+    c.edges([('a0', 'a1'), ('a1', 'a2'), ('a2', 'a3')])
+    c.attr(label='process #1')
 
-g.subgraph(c0)
-g.subgraph(c1)
+with g.subgraph(name='cluster_1') as c:
+    c.node_attr.update(style='filled')
+    c.edges([('b0', 'b1'), ('b1', 'b2'), ('b2', 'b3')])
+    c.attr(label='process #2')
+    c.attr(color='blue')
 
 g.edge('start', 'a0')
 g.edge('start', 'b0')

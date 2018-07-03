@@ -18,31 +18,36 @@ digraph {
     A [label="King Arthur"]
     B [label="Sir Bedevere the Wise"]
     L [label="Sir Lancelot the Brave"]
-        A -> B
-        A -> L
-        B -> L [constraint=false]
+    A -> B
+    A -> L
+    B -> L [constraint=false]
 }
 """
 
 from .dot import Graph, Digraph
 from .files import Source
-from .backend import render, pipe, view, ENGINES, FORMATS
+from .lang import nohtml
+from .backend import render, pipe, version, view, ENGINES, FORMATS, ExecutableNotFound
 
 __all__ = [
     'Graph', 'Digraph',
     'Source',
-    'render', 'pipe', 'view',
+    'nohtml',
+    'render', 'pipe', 'version', 'view',
     'ENGINES', 'FORMATS',
+    'ExecutableNotFound',
 ]
 
 __title__ = 'graphviz'
-__version__ = '0.5.2'
+__version__ = '0.8.4'
 __author__ = 'Sebastian Bank <sebastian.bank@uni-leipzig.de>'
-__license__ = 'MIT, see LICENSE'
-__copyright__ = 'Copyright (c) 2013-2016 Sebastian Bank'
+__license__ = 'MIT, see LICENSE.txt'
+__copyright__ = 'Copyright (c) 2013-2018 Sebastian Bank'
 
-#: Set of the supported layout commands used for rendering ('dot', 'neato', ...)
+#: Set of known layout commands used for rendering (``'dot'``, ``'neato'``, ...)
 ENGINES = ENGINES
 
-#: Set of the supported output formats for rendering ('pdf', 'png', ...)
+#: Set of known output formats for rendering (``'pdf'``, ``'png'``, ...)
 FORMATS = FORMATS
+
+ExecutableNotFound = ExecutableNotFound
