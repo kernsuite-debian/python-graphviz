@@ -1,4 +1,4 @@
-python-graphviz (0.5.2-2) UNRELEASED; urgency=medium
+python-graphviz (0.8.4-1) unstable; urgency=medium
 
   [ Diane Trout ]
   * Add missing Vcs-* tags
@@ -11,7 +11,21 @@ python-graphviz (0.5.2-2) UNRELEASED; urgency=medium
   * d/control: Remove ancient X-Python-Version field
   * d/control: Remove ancient X-Python3-Version field
 
- -- Diane Trout <diane@ghic.org>  Thu, 05 Jan 2017 17:14:26 -0800
+  [ Diane Trout ]
+  * New upstream release
+  * Remove dh_auto_test-runs-the-tests-in-a-subdirectory patch
+  * Update debhelper compat to 11
+  * Update Standards-Version to 4.1.4. No changes needed.
+  * Allow running tests multiple times.
+  * Add additional dependencies for running tests
+  * Remove unneeded Testsuite header
+  * Install examples
+  * Delete .pytest_cache so rebuilding in the same tree works
+  * Delete .coverage and htmlcov files installed by mistake
+  * Ignore test_pipe_pipe_invalid_data_mocked test requires pytest-mock >= 1.8
+    - TODO: Delete after pytest-mock is updated
+
+ -- Diane Trout <diane@ghic.org>  Sun, 22 Jul 2018 21:30:14 -0700
 
 python-graphviz (0.5.2-1) unstable; urgency=low
 
