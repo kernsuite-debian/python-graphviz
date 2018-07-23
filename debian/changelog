@@ -1,3 +1,9 @@
+python-graphviz (0.8.4-2) unstable; urgency=medium
+
+  * Add additional test dependencies to autopkgtests tests
+
+ -- Diane Trout <diane@ghic.org>  Mon, 23 Jul 2018 12:52:41 -0700
+
 python-graphviz (0.8.4-1) unstable; urgency=medium
 
   [ Diane Trout ]
