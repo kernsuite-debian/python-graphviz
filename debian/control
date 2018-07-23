@@ -12,7 +12,7 @@ Build-Depends: debhelper (>= 11),
                python3-pytest,
                python3-setuptools,
                python3-unittest2
-Standards-Version: 3.9.8
+Standards-Version: 4.1.4
 Homepage: https://github.com/xflr6/graphviz
 Vcs-Git: https://salsa.debian.org/python-team/modules/python-graphviz.git
 Vcs-Browser: https://salsa.debian.org/python-team/modules/python-graphviz
