@@ -15,7 +15,17 @@ Build-Depends: debhelper (>= 11),
                python3-pytest-mock,
                python3-pytest-cov,
                python3-setuptools,
-               python3-unittest2
+               python3-unittest2,
+               python-all,
+               python-coverage,
+               python-flake8,
+               python-mock,
+               python-pep8-naming,
+               python-pytest,
+               python-pytest-mock,
+               python-pytest-cov,
+               python-setuptools,
+               python-unittest2
 Standards-Version: 4.1.4
 Homepage: https://github.com/xflr6/graphviz
 Vcs-Git: https://salsa.debian.org/python-team/modules/python-graphviz.git
@@ -37,3 +47,20 @@ Description: Simple Python 3 interface for Graphviz
  and displayed within Jupyter notebooks.
  .
  This contains the Python 3 version.
+
+Package: python-graphviz
+Architecture: all
+Depends: graphviz, ${misc:Depends}, ${python:Depends}
+Description: Simple Python 2 interface for Graphviz
+ This package facilitates the creation and rendering of graph descriptions in
+ the DOT language of the Graphviz graph drawing software from Python.
+ .
+ Create a graph object, assemble the graph by adding nodes and edges, and
+ retrieve its DOT source code string. Save the source code to a file and render
+ it with the Graphviz installation of your system.
+ .
+ Use the ``view`` option/method to directly inspect the resulting (PDF, PNG,
+ SVG, etc.) file with its default application. Graphs can also be rendered
+ and displayed within Jupyter notebooks.
+ .
+ This contains the Python 2 version.
