@@ -1,8 +1,12 @@
-python-graphviz (0.8.4-3) UNRELEASED; urgency=medium
+python-graphviz (0.8.4-3~kern1) bionic; urgency=medium
 
+  [ Ondřej Nový ]
   * Convert git repository from git-dpm to gbp layout
 
- -- Ondřej Nový <onovy@debian.org>  Wed, 08 Aug 2018 16:17:28 +0200
+  [ Gijs Molenaar ]
+  * backport to python2
+
+ -- KERN packaging <packaging@kernsuite.info>  Mon, 20 Aug 2018 14:53:55 +0200
 
 python-graphviz (0.8.4-2) unstable; urgency=medium
 
