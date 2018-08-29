@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: graphviz
-Version: 0.8.4
+Version: 0.9
 Summary: Simple Python interface for Graphviz
 Home-page: https://github.com/xflr6/graphviz
 Author: Sebastian Bank

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import subprocess
 
 PY2 = sys.version_info.major == 2
 
@@ -20,8 +21,10 @@ if PY2:
             if not exist_ok or not os.path.isdir(name):
                 raise
 
-    def stderr_write_binary(data):
+    def stderr_write_bytes(data, flush=False):
         sys.stderr.write(data)
+        if flush:
+            sys.stderr.flush()
 
 
 else:
@@ -34,6 +37,28 @@ else:
     def makedirs(name, mode=0o777, exist_ok=False):  # allow os.makedirs mocking
         return os.makedirs(name, mode, exist_ok=exist_ok)
 
-    def stderr_write_binary(data):
+    def stderr_write_bytes(data, flush=False):
         encoding = sys.stderr.encoding or sys.getdefaultencoding()
         sys.stderr.write(data.decode(encoding))
+        if flush:
+            sys.stderr.flush()
+
+
+if sys.version_info < (3, 5):
+    class CalledProcessError(subprocess.CalledProcessError):
+
+        def __init__(self, returncode, cmd, output=None, stderr=None):
+            super(CalledProcessError, self).__init__(returncode, cmd, output)
+            self.stderr = stderr
+
+        @property
+        def stdout(self):
+            return self.output
+
+        @stdout.setter
+        def stdout(self, value):  # pragma: no cover
+            self.output = value
+
+
+else:
+    CalledProcessError = subprocess.CalledProcessError
