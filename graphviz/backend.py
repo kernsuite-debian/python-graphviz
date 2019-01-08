@@ -1,19 +1,20 @@
 # backend.py - execute rendering, open files in viewer
 
 import os
-import io
 import re
-import sys
 import errno
 import platform
 import subprocess
-import contextlib
 
 from ._compat import CalledProcessError, stderr_write_bytes
 
 from . import tools
 
-__all__ = ['render', 'pipe', 'version', 'view']
+__all__ = [
+    'render', 'pipe', 'version', 'view',
+    'ENGINES', 'FORMATS', 'RENDERERS', 'FORMATTERS',
+    'ExecutableNotFound', 'RequiredArgumentError',
+]
 
 ENGINES = {  # http://www.graphviz.org/pdf/dot.1.pdf
     'dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage',
@@ -59,19 +60,26 @@ FORMATS = {  # http://www.graphviz.org/doc/info/output.html
     'x11',
 }
 
+RENDERERS = {  # $ dot -T:
+    'cairo',
+    'dot',
+    'fig',
+    'gd',
+    'gdiplus',
+    'map',
+    'pic',
+    'pov',
+    'ps',
+    'svg',
+    'tk',
+    'vml',
+    'vrml',
+    'xdot',
+}
+
+FORMATTERS = {'cairo', 'core', 'gd', 'gdiplus', 'gdwbmp', 'xlib'}
+
 PLATFORM = platform.system().lower()
-
-POPEN_KWARGS = {}
-
-if PLATFORM == 'windows':  # pragma: no cover
-    POPEN_KWARGS['startupinfo'] = subprocess.STARTUPINFO()
-    POPEN_KWARGS['startupinfo'].dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    POPEN_KWARGS['startupinfo'].wShowWindow = subprocess.SW_HIDE
-    # work around WinError 87 from https://bugs.python.org/issue19764
-    # https://github.com/python/cpython/commit/b2a6083eb0384f38839d3f1ed32262a3852026fa
-    # TODO: consider not reusing the instance instead (adapt test code for this)
-    if sys.version_info >= (3, 7):
-        POPEN_KWARGS['close_fds'] = False
 
 
 class ExecutableNotFound(RuntimeError):
@@ -84,31 +92,59 @@ class ExecutableNotFound(RuntimeError):
         super(ExecutableNotFound, self).__init__(self._msg % args)
 
 
-def command(engine, format, filepath=None):
+class RequiredArgumentError(Exception):
+    """Exception raised if a required argument is missing."""
+
+
+def command(engine, format, filepath=None, renderer=None, formatter=None):
     """Return args list for ``subprocess.Popen`` and name of the rendered file."""
+    if formatter is not None and renderer is None:
+        raise RequiredArgumentError('formatter given without renderer')
+
     if engine not in ENGINES:
         raise ValueError('unknown engine: %r' % engine)
     if format not in FORMATS:
         raise ValueError('unknown format: %r' % format)
+    if renderer is not None and renderer not in RENDERERS:
+        raise ValueError('unknown renderer: %r' % renderer)
+    if formatter is not None and formatter not in FORMATTERS:
+        raise ValueError('unknown formatter: %r' % formatter)
 
-    cmd = [engine, '-T%s' % format]
+    format_arg = [s for s in (format, renderer, formatter) if s is not None]
+    suffix = '.'.join(reversed(format_arg))
+    format_arg = ':'.join(format_arg)
+
+    cmd = [engine, '-T%s' % format_arg]
     rendered = None
     if filepath is not None:
         cmd.extend(['-O', filepath])
-        rendered = '%s.%s' % (filepath, format)
+        rendered = '%s.%s' % (filepath, suffix)
 
     return cmd, rendered
 
 
+if PLATFORM == 'windows':  # pragma: no cover
+    def get_startupinfo():
+        """Return subprocess.STARTUPINFO instance hiding the console window."""
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = subprocess.SW_HIDE
+        return startupinfo
+else:
+    def get_startupinfo():
+        """Return None for startupinfo argument of ``subprocess.Popen``."""
+        return None
+
+
 def run(cmd, input=None, capture_output=False, check=False, quiet=False, **kwargs):
+    """Run the command described by cmd and return its (stdout, stderr) tuple."""
     if input is not None:
         kwargs['stdin'] = subprocess.PIPE
     if capture_output:
         kwargs['stdout'] = kwargs['stderr'] = subprocess.PIPE
-    kwargs.update(POPEN_KWARGS)
 
     try:
-        proc = subprocess.Popen(cmd, **kwargs)
+        proc = subprocess.Popen(cmd, startupinfo=get_startupinfo(), **kwargs)
     except OSError as e:
         if e.errno == errno.ENOENT:
             raise ExecutableNotFound(cmd)
@@ -116,49 +152,57 @@ def run(cmd, input=None, capture_output=False, check=False, quiet=False, **kwarg
             raise
 
     out, err = proc.communicate(input)
+
     if not quiet and err:
         stderr_write_bytes(err, flush=True)
     if check and proc.returncode:
         raise CalledProcessError(proc.returncode, cmd, output=out, stderr=err)
+
     return out, err
 
 
-def render(engine, format, filepath, quiet=False):
+def render(engine, format, filepath, renderer=None, formatter=None, quiet=False):
     """Render file with Graphviz ``engine`` into ``format``,  return result filename.
 
     Args:
         engine: The layout commmand used for rendering (``'dot'``, ``'neato'``, ...).
         format: The output format used for rendering (``'pdf'``, ``'png'``, ...).
         filepath: Path to the DOT source file to render.
+        renderer: The output renderer used for rendering (``'cairo'``, ``'gd'``, ...).
+        formatter: The output formatter used for rendering (``'cairo'``, ``'gd'``, ...).
         quiet (bool): Suppress ``stderr`` output.
     Returns:
         The (possibly relative) path of the rendered file.
     Raises:
-        ValueError: If ``engine`` or ``format`` are not known.
+        ValueError: If ``engine``, ``format``, ``renderer``, or ``formatter`` are not known.
+        graphviz.RequiredArgumentError: If ``formatter`` is given but ``renderer`` is None.
         graphviz.ExecutableNotFound: If the Graphviz executable is not found.
         subprocess.CalledProcessError: If the exit status is non-zero.
     """
-    cmd, rendered = command(engine, format, filepath)
+    cmd, rendered = command(engine, format, filepath, renderer, formatter)
     run(cmd, capture_output=True, check=True, quiet=quiet)
     return rendered
 
 
-def pipe(engine, format, data, quiet=False):
+def pipe(engine, format, data, renderer=None, formatter=None, quiet=False):
     """Return ``data`` piped through Graphviz ``engine`` into ``format``.
 
     Args:
         engine: The layout commmand used for rendering (``'dot'``, ``'neato'``, ...).
         format: The output format used for rendering (``'pdf'``, ``'png'``, ...).
         data: The binary (encoded) DOT source string to render.
+        renderer: The output renderer used for rendering (``'cairo'``, ``'gd'``, ...).
+        formatter: The output formatter used for rendering (``'cairo'``, ``'gd'``, ...).
         quiet (bool): Suppress ``stderr`` output.
     Returns:
         Binary (encoded) stdout of the layout command.
     Raises:
-        ValueError: If ``engine`` or ``format`` are not known.
+        ValueError: If ``engine``, ``format``, ``renderer``, or ``formatter`` are not known.
+        graphviz.RequiredArgumentError: If ``formatter`` is given but ``renderer`` is None.
         graphviz.ExecutableNotFound: If the Graphviz executable is not found.
         subprocess.CalledProcessError: If the exit status is non-zero.
     """
-    cmd, _ = command(engine, format)
+    cmd, _ = command(engine, format, None, renderer, formatter)
     out, _ = run(cmd, input=data, capture_output=True, check=True, quiet=quiet)
     return out
 

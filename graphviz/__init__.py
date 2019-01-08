@@ -27,19 +27,21 @@ digraph {
 from .dot import Graph, Digraph
 from .files import Source
 from .lang import nohtml
-from .backend import render, pipe, version, view, ENGINES, FORMATS, ExecutableNotFound
+from .backend import (render, pipe, version, view,
+    ENGINES, FORMATS, RENDERERS, FORMATTERS,
+    ExecutableNotFound, RequiredArgumentError)
 
 __all__ = [
     'Graph', 'Digraph',
     'Source',
     'nohtml',
     'render', 'pipe', 'version', 'view',
-    'ENGINES', 'FORMATS',
-    'ExecutableNotFound',
+    'ENGINES', 'FORMATS', 'RENDERERS', 'FORMATTERS',
+    'ExecutableNotFound', 'RequiredArgumentError',
 ]
 
 __title__ = 'graphviz'
-__version__ = '0.9'
+__version__ = '0.10.1'
 __author__ = 'Sebastian Bank <sebastian.bank@uni-leipzig.de>'
 __license__ = 'MIT, see LICENSE.txt'
 __copyright__ = 'Copyright (c) 2013-2018 Sebastian Bank'
@@ -50,4 +52,12 @@ ENGINES = ENGINES
 #: Set of known output formats for rendering (``'pdf'``, ``'png'``, ...)
 FORMATS = FORMATS
 
+#: Set of known output renderers for rendering (``'cairo'``, ``'gd'``, ...)
+FORMATTERS = FORMATTERS
+
+#: Set of known output formatters for rendering (``'cairo'``, ``'gd'``, ...)
+RENDERERS = RENDERERS
+
 ExecutableNotFound = ExecutableNotFound
+
+RequiredArgumentError = RequiredArgumentError

@@ -1,21 +1,50 @@
 # test_backend.py
 
+import re
+import platform
 import subprocess
 
 import pytest
 
-from graphviz.backend import (render, pipe, version, view,
-                              ExecutableNotFound, POPEN_KWARGS)
+from graphviz.backend import (
+    render, pipe, version, view,
+    ExecutableNotFound, RequiredArgumentError)
+
+
+if platform.system().lower() == 'windows':
+    def check_startupinfo(Popen):
+        startupinfo = Popen.call_args[1]['startupinfo']
+        assert isinstance(startupinfo, subprocess.STARTUPINFO)
+        assert startupinfo.dwFlags & subprocess.STARTF_USESHOWWINDOW
+        assert startupinfo.wShowWindow == subprocess.SW_HIDE
+else:
+    def check_startupinfo(Popen):
+        assert Popen.call_args[1]['startupinfo'] is None
 
 
 def test_render_engine_unknown():
-    with pytest.raises(ValueError, match=r'engine'):
+    with pytest.raises(ValueError, match=r'unknown engine'):
         render('', 'pdf', 'nonfilepath')
 
 
 def test_render_format_unknown():
-    with pytest.raises(ValueError, match=r'format'):
+    with pytest.raises(ValueError, match=r'unknown format'):
         render('dot', '', 'nonfilepath')
+
+
+def test_render_renderer_unknown():
+    with pytest.raises(ValueError, match=r'unknown renderer'):
+        render('dot', 'ps', 'nonfilepath', '', None)
+
+
+def test_render_renderer_missing():
+    with pytest.raises(RequiredArgumentError, match=r'without renderer'):
+        render('dot', 'ps', 'nonfilepath', None, 'core')
+
+
+def test_render_formatter_unknown():
+    with pytest.raises(ValueError, match=r'unknown formatter'):
+        render('dot', 'ps', 'nonfilepath', 'ps', '')
 
 
 @pytest.mark.usefixtures('empty_path')
@@ -32,13 +61,18 @@ def test_render_missing_file(quiet, engine='dot', format_='pdf'):
 
 
 @pytest.exe
-def test_render(capsys, tmpdir, engine='dot', format_='pdf',
+@pytest.mark.parametrize('format_, renderer, formatter, expected_suffix', [
+    ('pdf', None, None, 'pdf'),
+    ('plain', 'dot', 'core', 'core.dot.plain'),
+])
+@pytest.mark.parametrize('engine', ['dot'])
+def test_render(capsys, tmpdir, engine, format_, renderer, formatter, expected_suffix,
                 filename='hello.gv', data=b'digraph { hello -> world }'):
     lpath = tmpdir / filename
     lpath.write_binary(data)
-    rendered = lpath.new(ext='%s.%s' % (lpath.ext, format_))
+    rendered = lpath.new(ext='%s.%s' % (lpath.ext, expected_suffix))
 
-    assert render(engine, format_, str(lpath)) == str(rendered)
+    assert render(engine, format_, str(lpath), renderer, formatter) == str(rendered)
 
     assert rendered.size()
     assert capsys.readouterr() == ('', '')
@@ -47,14 +81,15 @@ def test_render(capsys, tmpdir, engine='dot', format_='pdf',
 def test_render_mocked(capsys, mocker, Popen, quiet):
     proc = Popen.return_value
     proc.returncode = 0
-    proc.communicate.return_value = (mocker.sentinel.out, b'stderr')
+    proc.communicate.return_value = (b'stdout', b'stderr')
 
     assert render('dot', 'pdf', 'nonfilepath', quiet=quiet) == 'nonfilepath.pdf'
 
     Popen.assert_called_once_with(['dot', '-Tpdf', '-O', 'nonfilepath'],
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
-                                  **POPEN_KWARGS)
+                                  startupinfo=mocker.ANY)
+    check_startupinfo(Popen)
     proc.communicate.assert_called_once_with(None)
     assert capsys.readouterr() == ('', '' if quiet else 'stderr')
 
@@ -81,11 +116,17 @@ def test_pipe_invalid_data(capsys, quiet, engine='dot', format_='svg'):
 
 
 @pytest.exe
-def test_pipe(capsys, svg_pattern, engine='dot', format_='svg',
+@pytest.mark.parametrize('format_, renderer, formatter, pattern', [
+    ('svg', None, None, r'(?s)^<\?xml .+</svg>\s*$'),
+    ('ps', 'ps', 'core', r'%!PS-'),
+])
+@pytest.mark.parametrize('engine', ['dot'])
+def test_pipe(capsys, engine, format_, renderer, formatter, pattern,
               data=b'graph { spam }'):
-    src = pipe(engine, format_, data).decode('ascii')
+    src = pipe(engine, format_, data, renderer, formatter).decode('ascii')
 
-    assert svg_pattern.match(src)
+    if pattern is not None:
+        assert re.match(pattern, src)
     assert capsys.readouterr() == ('', '')
 
 
@@ -106,7 +147,8 @@ def test_pipe_pipe_invalid_data_mocked(mocker, py2, Popen, quiet):  # noqa: N803
                                   stdin=subprocess.PIPE,
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
-                                  **POPEN_KWARGS)
+                                  startupinfo=mocker.ANY)
+    check_startupinfo(Popen)
     proc.communicate.assert_called_once_with(b'nongraph')
     if not quiet:
         if py2:
@@ -128,7 +170,8 @@ def test_pipe_mocked(capsys, mocker, Popen, quiet):  # noqa: N803
                                   stdin=subprocess.PIPE,
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE,
-                                  **POPEN_KWARGS)
+                                  startupinfo=mocker.ANY)
+    check_startupinfo(Popen)
     proc.communicate.assert_called_once_with(b'nongraph')
     assert capsys.readouterr() == ('', '' if quiet else 'stderr')
 
@@ -145,7 +188,7 @@ def test_version(capsys):
     assert capsys.readouterr() == ('', '')
 
 
-def test_version_parsefail_mocked(Popen):
+def test_version_parsefail_mocked(mocker, Popen):
     proc = Popen.return_value
     proc.returncode = 0
     proc.communicate.return_value = (b'nonversioninfo', None)
@@ -156,11 +199,12 @@ def test_version_parsefail_mocked(Popen):
     Popen.assert_called_once_with(['dot', '-V'],
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.STDOUT,
-                                  **POPEN_KWARGS)
+                                  startupinfo=mocker.ANY)
+    check_startupinfo(Popen)
     proc.communicate.assert_called_once_with(None)
 
 
-def test_version_mocked(Popen):
+def test_version_mocked(mocker, Popen):
     proc = Popen.return_value
     proc.returncode = 0
     proc.communicate.return_value = (b'dot - graphviz version 1.2.3 (mocked)', None)
@@ -170,7 +214,8 @@ def test_version_mocked(Popen):
     Popen.assert_called_once_with(['dot', '-V'],
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.STDOUT,
-                                  **POPEN_KWARGS)
+                                  startupinfo=mocker.ANY)
+    check_startupinfo(Popen)
     proc.communicate.assert_called_once_with(None)
 
 

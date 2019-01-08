@@ -69,16 +69,27 @@ documented above.
 Other
 -----
 
-.. autodata:: graphviz.ENGINES
-   :annotation:
-
-.. autodata:: graphviz.FORMATS
-   :annotation:
-
 .. autodata:: graphviz.ExecutableNotFound
+   :annotation:
+
+.. autodata:: graphviz.RequiredArgumentError
    :annotation:
 
 .. autofunction:: graphviz.version
 
 .. autofunction:: graphviz.nohtml
 
+Manually maintained whitelists (see  https://graphviz.gitlab.io/_pages/pdf/dot.1.pdf,
+http://www.graphviz.org/doc/info/output.html, and ``dot -T:`` output):
+
+.. autodata:: graphviz.ENGINES
+   :annotation:
+
+.. autodata:: graphviz.FORMATS
+   :annotation:
+
+.. autodata:: graphviz.RENDERERS
+   :annotation:
+
+.. autodata:: graphviz.FORMATTERS
+   :annotation:
